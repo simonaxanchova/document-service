@@ -41,3 +41,13 @@ func (h *DocumentHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	h.Store.Delete(id)
 	w.WriteHeader(http.StatusNoContent)
 }
+
+func (h *DocumentHandler) Search(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query().Get("q")
+	if query == "" {
+		http.Error(w, "Query parameter 'q' is required", http.StatusBadRequest)
+		return
+	}
+	results := h.Store.Search(query)
+	json.NewEncoder(w).Encode(results)
+}

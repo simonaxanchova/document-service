@@ -2,6 +2,7 @@ package storage
 
 import (
 	"document-service/models"
+	"strings"
 	"sync" // imported to use a mutex for safe concurrent access
 )
 
@@ -47,4 +48,23 @@ func (s *MemoryStore) Delete(id string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	delete(s.documents, id)
+}
+
+func (s *MemoryStore) Search(query string) []models.Document {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	results := []models.Document{}
+	for _, doc := range s.documents {
+		if containsIgnoreCase(doc.Name, query) || containsIgnoreCase(doc.Description, query) {
+			results = append(results, doc)
+		}
+	}
+	return results
+}
+
+func containsIgnoreCase(text, substr string) bool {
+	text = strings.ToLower(text)
+	substr = strings.ToLower(substr)
+	return strings.Contains(text, substr)
 }

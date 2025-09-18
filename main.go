@@ -14,6 +14,7 @@ func main() {
 	http.HandleFunc("/document/create", handler.Create)
 	http.HandleFunc("/document/get", handler.GetByID)
 	http.HandleFunc("/document/delete", handler.Delete)
+	http.HandleFunc("/document/search", handler.Search)
 
 	http.ListenAndServe(":8080", nil)
 }
