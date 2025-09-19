@@ -4,10 +4,7 @@ import (
 	"document-service/models"
 	"document-service/storage"
 	"encoding/json"
-	"fmt"
 	"net/http"
-
-	"github.com/google/uuid"
 )
 
 type DocumentHandler struct {
@@ -16,10 +13,13 @@ type DocumentHandler struct {
 
 func (h *DocumentHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var doc models.Document
-	fmt.Println("Tuka sum")
-	json.NewDecoder(r.Body).Decode(&doc)
-	doc.ID = uuid.New().String()
+	if err := json.NewDecoder(r.Body).Decode(&doc); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	h.Store.Create(doc)
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(doc)
 }
 

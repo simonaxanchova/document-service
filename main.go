@@ -3,6 +3,7 @@ package main
 import (
 	"document-service/handlers"
 	"document-service/storage"
+	"log"
 	"net/http"
 )
 
@@ -16,5 +17,8 @@ func main() {
 	http.HandleFunc("/document/delete", handler.Delete)
 	http.HandleFunc("/document/search", handler.Search)
 
-	http.ListenAndServe(":8080", nil)
+	log.Println("Starting the document-service on port 8080")
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		log.Fatal(err)
+	}
 }
