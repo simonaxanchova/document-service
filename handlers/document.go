@@ -5,6 +5,7 @@ import (
 	"document-service/storage"
 	"encoding/json"
 	"net/http"
+	"strings"
 )
 
 type DocumentHandler struct {
@@ -48,6 +49,11 @@ func (h *DocumentHandler) Search(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Query parameter 'q' is required", http.StatusBadRequest)
 		return
 	}
+
+	// Normalize query (trim spaces, lowercase)
+	query = strings.TrimSpace(query)
 	results := h.Store.Search(query)
+
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(results)
 }

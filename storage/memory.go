@@ -54,17 +54,48 @@ func (s *MemoryStore) Search(query string) []models.Document {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
+	tokens := strings.Fields(strings.ToLower(query))
+
 	results := []models.Document{}
 	for _, doc := range s.documents {
-		if containsIgnoreCase(doc.Name, query) || containsIgnoreCase(doc.Description, query) {
+		text := strings.ToLower(doc.Name + " " + doc.Description)
+
+		if matchesQuery(text, tokens) {
 			results = append(results, doc)
 		}
 	}
 	return results
 }
 
-func containsIgnoreCase(text, substr string) bool {
-	text = strings.ToLower(text)
-	substr = strings.ToLower(substr)
-	return strings.Contains(text, substr)
+func matchesQuery(text string, tokens []string) bool {
+	result := false
+	operator := "OR" // Default operator if not specified
+
+	for i := 0; i < len(tokens); i++ {
+		token := tokens[i]
+
+		switch token {
+		case "and":
+			operator = "AND"
+		case "or":
+			operator = "OR"
+		case "not":
+			operator = "NOT"
+		default:
+			found := strings.Contains(text, token)
+
+			switch operator {
+			case "AND":
+				result = result && found
+			case "OR":
+				result = result || found
+			case "NOT":
+
+				result = result && !found
+			default:
+				result = found
+			}
+		}
+	}
+	return result
 }
