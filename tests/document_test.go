@@ -17,6 +17,17 @@ func TestCreateAndGet(t *testing.T) {
 	}
 }
 
+func TestGetAll(t *testing.T) {
+	store := storage.NewMemoryStore()
+	store.Create(models.Document{ID: "1", Name: "Doc1", Description: ""})
+	store.Create(models.Document{ID: "2", Name: "Doc2", Description: ""})
+
+	results := store.GetAll()
+	if len(results) != 2 {
+		t.Errorf("Expected 2 documents, got %d", len(results))
+	}
+}
+
 func TestGetNonExistent(t *testing.T) {
 	store := storage.NewMemoryStore()
 
@@ -70,5 +81,49 @@ func TestDeleteDocument(t *testing.T) {
 	_, ok := store.GetByID("1")
 	if ok {
 		t.Errorf("Expected document to be deleted")
+	}
+}
+
+func TestSearchAND(t *testing.T) {
+	store := storage.NewMemoryStore()
+	store.Create(models.Document{ID: "1", Name: "Apple Orange", Description: ""})
+	store.Create(models.Document{ID: "2", Name: "Apple", Description: ""})
+	store.Create(models.Document{ID: "3", Name: "Orange", Description: ""})
+
+	results := store.Search("apple AND orange")
+	if len(results) != 1 || results[0].ID != "1" {
+		t.Errorf("Expected only document 1, got %v", results)
+	}
+}
+
+func TestSearchOR(t *testing.T) {
+	store := storage.NewMemoryStore()
+	store.Create(models.Document{ID: "1", Name: "Apple", Description: ""})
+	store.Create(models.Document{ID: "2", Name: "Orange", Description: ""})
+
+	results := store.Search("apple OR orange")
+	if len(results) != 2 {
+		t.Errorf("Expected 2 documents, got %d", len(results))
+	}
+}
+
+func TestSearchNOT(t *testing.T) {
+	store := storage.NewMemoryStore()
+	store.Create(models.Document{ID: "1", Name: "Apple", Description: ""})
+	store.Create(models.Document{ID: "2", Name: "Banana", Description: ""})
+
+	results := store.Search("apple NOT banana")
+	if len(results) != 1 || results[0].ID != "1" {
+		t.Errorf("Expected only document 1, got %v", results)
+	}
+}
+
+func TestSearchCaseInsensitive(t *testing.T) {
+	store := storage.NewMemoryStore()
+	store.Create(models.Document{ID: "1", Name: "Apple", Description: ""})
+
+	results := store.Search("APPLE")
+	if len(results) != 1 {
+		t.Errorf("Expected 1 document, got %d", len(results))
 	}
 }
