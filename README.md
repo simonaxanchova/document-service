@@ -1,4 +1,4 @@
-# Docker Testing
+# document-service
 
 ### Build the Docker Image
 
@@ -49,6 +49,6 @@ curl -X DELETE "http://localhost:8080/document/delete?id=1"
 #### Search documents
 
 ```bash
-curl "http://localhost:8080/document/search?query=test"
+curl "http://localhost:8080/document/search?q=test"
 ```
 
