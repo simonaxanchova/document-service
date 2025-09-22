@@ -36,14 +36,14 @@ curl http://localhost:8080/documents
 #### Get document by ID
 
 ```bash
-curl "http://localhost:8080/document/get?id=1"
+curl "http://localhost:8080/document/get/1"
 ```
 
 
 #### Delete a document
 
 ```bash
-curl -X DELETE "http://localhost:8080/document/delete?id=1"
+curl -X DELETE "http://localhost:8080/document/delete/1"
 ```
 
 #### Search documents
