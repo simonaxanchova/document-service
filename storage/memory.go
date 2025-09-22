@@ -3,18 +3,15 @@ package storage
 import (
 	"document-service/models"
 	"strings"
-	"sync" // imported to use a mutex for safe concurrent access
+	"sync"
 )
-
-// Lock/Unlock for writing
-// RLock/RUnlock for reading
 
 type MemoryStore struct {
 	mu        sync.RWMutex //read-write mutex
 	documents map[string]models.Document
 }
 
-// NewMemoryStore Constructor - Creates a new MemoryStore with an empty documents map
+// NewMemoryStore Constructor
 func NewMemoryStore() *MemoryStore {
 	return &MemoryStore{
 		documents: make(map[string]models.Document),
@@ -68,32 +65,37 @@ func (s *MemoryStore) Search(query string) []models.Document {
 }
 
 func matchesQuery(text string, tokens []string) bool {
+	text = strings.ToLower(text)
 	result := false
 	operator := "OR" // Default operator if not specified
+	negateNext := false
+	firstToken := true
 
-	for i := 0; i < len(tokens); i++ {
-		token := tokens[i]
-
+	for _, token := range tokens {
 		switch token {
 		case "and":
 			operator = "AND"
 		case "or":
 			operator = "OR"
 		case "not":
-			operator = "NOT"
+			negateNext = true
 		default:
 			found := strings.Contains(text, token)
+			if negateNext {
+				found = !found
+				negateNext = false
+			}
 
-			switch operator {
-			case "AND":
-				result = result && found
-			case "OR":
-				result = result || found
-			case "NOT":
-
-				result = result && !found
-			default:
+			if firstToken {
 				result = found
+				firstToken = false
+			} else {
+				switch operator {
+				case "AND":
+					result = result && found
+				case "OR":
+					result = result || found
+				}
 			}
 		}
 	}

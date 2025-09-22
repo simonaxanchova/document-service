@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
+
+	"github.com/gorilla/mux"
 )
 
 type DocumentHandler struct {
@@ -29,7 +31,9 @@ func (h *DocumentHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *DocumentHandler) GetByID(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("id")
+	vars := mux.Vars(r)
+	id := vars["id"]
+
 	if doc, ok := h.Store.GetByID(id); ok {
 		json.NewEncoder(w).Encode(doc)
 	} else {
@@ -38,7 +42,9 @@ func (h *DocumentHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *DocumentHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("id")
+	vars := mux.Vars(r)
+	id := vars["id"]
+
 	h.Store.Delete(id)
 	w.WriteHeader(http.StatusNoContent)
 }
